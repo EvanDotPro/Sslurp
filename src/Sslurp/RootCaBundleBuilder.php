@@ -109,7 +109,7 @@ EOT;
             'CN_match'          => 'mxr.mozilla.org',
         )));
         $fp = stream_socket_client('ssl://mxr.mozilla.org:443', $errNo, $errStr, 30, STREAM_CLIENT_CONNECT, $ctx);
-        if (!$fp) throw new \RuntimeException($errStr, $errorNo);
+        if (!$fp) throw new \RuntimeException($errStr, $errNo);
         $headers  = "GET /mozilla/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1 HTTP/1.1\r\n";
         $headers .= "Host: mxr.mozilla.org\r\n";
         $headers .= "Connection: close\r\n";
