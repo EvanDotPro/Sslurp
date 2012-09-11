@@ -1,0 +1,25 @@
+{
+    "name": "evandotpro/sslurp",
+    "description": "Sllurp is a simple library which aims to make properly dealing with SSL in PHP suck less.",
+    "type": "library",
+    "keywords": [
+        "security",
+        "ssl"
+    ],
+    "homepage": "https://github.com/EvanDotPro/Sslurp",
+    "authors": [
+        {
+            "name": "Evan Coury",
+            "email": "me@evancoury.com",
+            "homepage": "http://blog.evan.pro/"
+        }
+    ],
+    "require": {
+        "php": ">=5.3"
+    },
+    "autoload": {
+        "psr-0": {
+            "Sslurp": "src/"
+        },
+    }
+}
