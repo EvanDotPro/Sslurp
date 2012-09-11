@@ -36,7 +36,7 @@ $fingerprint = implode(':', $fingerprint);
 <h2 style="text-align: center;">mxr.mozilla.org SSL certificate SHA1 fingerprint:</h2>
 <pre style="text-align: center; font-size: 25px;"><?php echo $fingerprint; ?></pre>
 <p style="text-align: center;">
-You are encouraged to <ahref="https://github.com/EvanDotPro/Sslurp/blob/master/bin/mozilla-ssl-fingerprint.php">view
+You are encouraged to <a href="https://github.com/EvanDotPro/Sslurp/blob/master/bin/mozilla-ssl-fingerprint.php">view
 the source of this file</a>. If you prefer additional verification, navigate to
 <a href="https://mxr.mozilla.org/">https://mxr.mozilla.org/</a> and view the
 certificate details in your own browser.
