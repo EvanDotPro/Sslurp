@@ -1,6 +1,6 @@
 {
     "name": "evandotpro/sslurp",
-    "description": "Sllurp is a simple library which aims to make properly dealing with SSL in PHP suck less.",
+    "description": "Sslurp is a simple library which aims to make properly dealing with SSL in PHP suck less.",
     "type": "library",
     "keywords": [
         "security",
