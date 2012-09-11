@@ -4,7 +4,10 @@ v0.1 by Evan Coury
 
 ## Introduction
 
-Unforunately, dealing with SSL properly in PHP is a pain in the ass. Sslurp
+**WARNING:** This library is currently undergoing review and should not yet be
+considered stable or secure. Proceed with caution...
+
+Dealing with SSL properly in PHP is a pain in the ass. Sslurp
 aims to make it suck less. Sslurp can be used as a stand-alone library or a ZF2
 module.
 
