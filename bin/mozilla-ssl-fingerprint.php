@@ -5,11 +5,12 @@ $caBundlePaths = array(
     '/etc/ssl/certs/ca-certificates.crt',
     '/etc/ssl/ca-bundle.pem',
     '/usr/share/ssl/certs/ca-bundle.crt',
+    __DIR__ . '/../data/Equifax_Secure_Ca.pem',
 );
 
 $trustedBundle = false;
 foreach ($caBundlePaths as $caBundle) {
-    if (file_exists($caBundle) && is_readable($caBundle)) {
+    if (is_readable($caBundle)) {
         $trustedBundle = $caBundle;
         break;
     }
