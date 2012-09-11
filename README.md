@@ -10,4 +10,4 @@ module.
 
 ## License
 
-Sllurp is released under the BSD license. See the included LICENSE file.
+Sslurp is released under the BSD license. See the included LICENSE file.
