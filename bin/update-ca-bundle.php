@@ -7,41 +7,33 @@ $help = <<<help
 Sslurp Root CA Bundle Updater
 
 Usage:
- {$argv[0]} [-o output_file] [sha1_fingerprint]
-
-Arguments
- sha1_fingerprint\tThe expected SHA1 fingerprint of the SSL certificate on mxr.mozilla.org.
+ {$argv[0]} [-o output_file]
 
 Options
- -o\tPath/filename to the file to (over)write he update root CA bundle. Default to stdout.
-
-To get the expected SHA1 fingerprint, go to https://evan.pro/ssl/ in your web browser.
-Be sure that your browser shows a proper SSL connection with no warnings.
+ -o\tPath/filename to the file to (over)write he update root CA bundle. Defaults to - (stdout).
 
 Sslurp home page: https://github.com/EvanDotPro/Sslurp
 help;
 
-$outputFile = false;
-for ($i=1; $i<$argc; $i++) {
-    switch ($argv[$i]) {
-        case '-o':
-            $outputFile = $argv[++$i];
-            break;
-        default:
-            $fingerprint = $argv[$i];
-            break;
-    }
-}
-
-if (!isset($fingerprint)) {
-    echo $help;
-    exit;
+$opts = getopt('o::');
+if (isset($opts['o']) && is_array($opts['o'])) {
+    echo "WARNING: Multiple output paths given; ignoring all but the first value provided: `{$opts['o'][0]}`\n\n";
+    $opts['o'] = $opts['o'][0];
+} elseif (!isset($opts['o']) && isset($argv[1])) {
+    $opts['o'] = $argv[1];
 }
 
 $caBundleBuilder = new Sslurp\RootCaBundleBuilder();
-$caBundle        = $caBundleBuilder->updateRootCaBundle($fingerprint, $outputFile);
-if (!$outputFile) {
+$caBundle        = $caBundleBuilder->getUpdatedRootCaBundle();
+
+if (!$caBundle) {
+    echo "Sorry, there was an error building the latest root CA bundle.\n";
+    exit(1);
+}
+
+if (!isset($opts['o']) || $opts['o'] == '-') {
     echo $caBundle;
 } else {
-    echo "Updated root CA bundle written to {$outputFile}.\n";
+    file_put_contents($opts['o'], $caBundle);
+    echo "Updated root CA bundle written to {$opts['o']}.\n";
 }

@@ -26,16 +26,10 @@ by going to [https://evan.pro/ssl/](https://evan.pro/ssl/).
 Sslurp Root CA Bundle Updater
 
 Usage:
- ./update-ca-bundle.php [-o output_file] [sha1_fingerprint]
-
-Arguments
- sha1_fingerprint	The expected SHA1 fingerprint of the SSL certificate on mxr.mozilla.org.
+ ./update-ca-bundle.php [-o output_file]
 
 Options
  -o	Path/filename to the file to (over)write he update root CA bundle. Default to stdout.
-
-To get the expected SHA1 fingerprint, go to https://evan.pro/ssl/ in your web browser.
-Be sure that your browser shows a proper SSL connection with no warnings.
 ```
 
 ## License

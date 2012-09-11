@@ -20,15 +20,10 @@ class RootCaBundleBuilder
         }
     }
 
-    public function updateRootCaBundle($expectedFingerprint, $outputFile = false)
+    public function getUpdatedRootCaBundle()
     {
-        $rawBundle = $this->getLatestRawCaBundle($expectedFingerprint);
-        $caBundle = $this->getLatestPemCaBundle($rawBundle);
-        if ($outputFile) {
-            file_put_contents($outputFile, $caBundle);
-            return true;
-        }
-        return $caBundle;
+        $rawBundle = $this->fetchLatestRawCaBundle();
+        return $this->buildLatestPemCaBundle($rawBundle);
     }
 
     protected function getSha1Fingerprint($certificate)
@@ -41,7 +36,7 @@ class RootCaBundleBuilder
         return implode(':', $fingerprint);
     }
 
-    protected function getLatestPemCaBundle($rawCaBundle)
+    protected function buildLatestPemCaBundle($rawCaBundle)
     {
         $rawCertData = explode("\n", $rawCaBundle);
         $currentDate = date(DATE_RFC822);
@@ -104,13 +99,13 @@ EOT;
         return $caBundle;
     }
 
-    protected function getLatestRawCaBundle($expectedFingerprint = false)
+    protected function fetchLatestRawCaBundle()
     {
         $ctx = stream_context_create(array('ssl' => array(
             'capture_peer_cert' => true,
-            'verify_peer'       => false,
+            'verify_peer'       => true,
             'allow_self_signed' => false,
-            //'cafile'            => '/etc/pki/tls/certs/ca-bundle.crt',
+            'cafile'            => $this->getRootCaBundlePath(),
             'CN_match'          => 'mxr.mozilla.org',
         )));
         $fp = stream_socket_client('ssl://mxr.mozilla.org:443', $errNo, $errStr, 30, STREAM_CLIENT_CONNECT, $ctx);
@@ -125,12 +120,17 @@ EOT;
             $response .= fgets($fp);
         }
         fclose($fp);
-        if ($expectedFingerprint) {
-            $params = stream_context_get_params($ctx);
-            $cert = $params['options']['ssl']['peer_certificate'];
-            openssl_x509_export($cert, $certString);
-            $fingerprint = $this->getSha1Fingerprint($certString);
-            if ($expectedFingerprint !== $fingerprint) {
+
+        $expectedFingerprint = '84:DE:06:37:9C:94:70:EF:56:AF:1A:CF:6F:42:B4:91:CF:57:23:FD'; // Verify and/or get the latest at https://evan.pro/ssl/
+        $params              = stream_context_get_params($ctx);
+        $cert                = $params['options']['ssl']['peer_certificate'];
+        openssl_x509_export($cert, $certString);
+        $fingerprint = $this->getSha1Fingerprint($certString);
+        if ($expectedFingerprint !== $fingerprint) {
+            if (time() > 1383282000) { // If it's November 1st, 2013 or later (mxr.mozilla.org cert expires Nov 28th, 2013)
+                echo "WARNING: mxr.mozilla.org certificate fingerprint may be out of date. " .
+                     "If you see this, message, please file an issue at https://github.com/EvanDotPro/Sslurp/issues\n";
+            } else {
                 echo "ERROR: Certificate fingerprint for mxr.mozilla.org did NOT match expected value!\n\n";
                 echo "Expected: {$expectedFingerprint}\n";
                 echo "Received: {$fingerprint}\n";
@@ -138,5 +138,22 @@ EOT;
             }
         }
         return $response;
+    }
+
+    protected function getRootCaBundlePath()
+    {
+        $caBundlePaths = array(
+            '/etc/pki/tls/certs/ca-bundle.crt',
+            '/etc/ssl/certs/ca-certificates.crt',
+            '/etc/ssl/ca-bundle.pem',
+            '/usr/share/ssl/certs/ca-bundle.crt',
+            __DIR__ . '/../../data/Equifax_Secure_Ca.pem',
+        );
+
+        foreach ($caBundlePaths as $caBundle) {
+            if (is_readable($caBundle)) return $caBundle;
+        }
+
+        return false;
     }
 }
