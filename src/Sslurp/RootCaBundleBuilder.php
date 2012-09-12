@@ -37,15 +37,15 @@ class RootCaBundleBuilder
      */
     protected function getCertificatePin($certificate)
     {
-        $parsed = openssl_x509_parse($certificate);
-        $pubkey = openssl_get_publickey($certificate);
+        $parsed        = openssl_x509_parse($certificate);
+        $pubkey        = openssl_get_publickey($certificate);
         $pubkeydetails = openssl_pkey_get_details($pubkey);
-        $pubkeypem = $pubkeydetails['key'];
+        $pubkeypem     = $pubkeydetails['key'];
         //Convert PEM to DER before SHA1'ing
-        $start = '-----BEGIN PUBLIC KEY-----';
-        $end = '-----END PUBLIC KEY-----';
-        $pemtrim = substr($pubkeypem, (strpos($pubkeypem, $start)+strlen($start)), (strlen($pubkeypem) - strpos($pubkeypem, $end))*(-1));
-        $der = base64_decode($pemtrim);
+        $start         = '-----BEGIN PUBLIC KEY-----';
+        $end           = '-----END PUBLIC KEY-----';
+        $pemtrim       = substr($pubkeypem, (strpos($pubkeypem, $start)+strlen($start)), (strlen($pubkeypem) - strpos($pubkeypem, $end))*(-1));
+        $der           = base64_decode($pemtrim);
 
         return sha1($der);
     }
@@ -79,28 +79,42 @@ EOT;
                 $caBundle .= $line;
                 while (($line = array_shift($rawCertData)) !== null) {
                     $caBundle .= $line;
-                    if (preg_match('/\*\*\*\*\* END LICENSE BLOCK \*\*\*\*\*/', $line)) break;
+                    if (preg_match('/\*\*\*\*\* END LICENSE BLOCK \*\*\*\*\*/', $line)) {
+                        break;
+                    }
                 }
             }
-            if (preg_match('/^#|^\s*$/', $line)) continue;
+
+            if (preg_match('/^#|^\s*$/', $line)) {
+                continue;
+            }
+
             $line = rtrim($line);
+
             if (preg_match('/^CVS_ID\s+\"(.*)\"/', $line, $match)) {
                 $caBundle .= "# $match[1]\n";
             }
+
             if (preg_match('/^CKA_LABEL\s+[A-Z0-9]+\s+\"(.*)\"/', $line, $match)) {
                 $caname = $match[1];
             }
+
             if (preg_match('/^CKA_VALUE MULTILINE_OCTAL/', $line)) {
                 $data = '';
                 while ($line = array_shift($rawCertData)) {
-                    if (preg_match('/^END/', $line)) break;
+                    if (preg_match('/^END/', $line)) {
+                        break;
+                    }
+
                     $line = rtrim($line);
                     $octets = explode('\\', $line);
                     array_shift($octets);
+
                     foreach ($octets as $oct) {
                         $data .= chr(octdec($oct));
                     }
                 }
+
                 $pem = "-----BEGIN CERTIFICATE-----\n"
                      . chunk_split(base64_encode($data), 76, "\n")
                      . "-----END CERTIFICATE-----\n";
@@ -122,13 +136,19 @@ EOT;
             'cafile'            => $this->getRootCaBundlePath(),
             'CN_match'          => 'mxr.mozilla.org',
         )));
+
         $fp = stream_socket_client('ssl://mxr.mozilla.org:443', $errNo, $errStr, 30, STREAM_CLIENT_CONNECT, $ctx);
-        if (!$fp) throw new \RuntimeException($errStr, $errNo);
+
+        if (!$fp) {
+            throw new \RuntimeException($errStr, $errNo);
+        }
+
         $headers  = "GET /mozilla/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1 HTTP/1.1\r\n";
         $headers .= "Host: mxr.mozilla.org\r\n";
         $headers .= "Connection: close\r\n";
         $headers .= "Accept: */*\r\n";
-        fwrite($fp, "{$headers}\r\n");
+        fwrite($fp, "{$headers}\r\n"); // send request
+
         $response = '';
         while (!feof($fp)) {
             $response .= fgets($fp);
@@ -139,6 +159,7 @@ EOT;
         $cert   = $params['options']['ssl']['peer_certificate'];
         openssl_x509_export($cert, $certString);
         $pin = $this->getCertificatePin($certString);
+
         if ($pin !== static::MOZILLA_MXR_SSL_PIN) {
             if (time() > 1383282000) { // If it's November 1st, 2013 or later (mxr.mozilla.org cert expires Nov 28th, 2013)
                 echo "WARNING: mxr.mozilla.org certificate pin may be out of date. " .
@@ -165,7 +186,9 @@ EOT;
         );
 
         foreach ($caBundlePaths as $caBundle) {
-            if (is_readable($caBundle)) return $caBundle;
+            if (is_readable($caBundle)) {
+                return $caBundle;
+            }
         }
 
         return false;
