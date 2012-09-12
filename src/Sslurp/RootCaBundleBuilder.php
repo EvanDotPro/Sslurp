@@ -25,6 +25,7 @@ class RootCaBundleBuilder
     public function getUpdatedRootCaBundle()
     {
         $rawBundle = $this->fetchLatestRawCaBundle();
+
         return $this->buildLatestPemCaBundle($rawBundle);
     }
 
@@ -45,6 +46,7 @@ class RootCaBundleBuilder
         $end = '-----END PUBLIC KEY-----';
         $pemtrim = substr($pubkeypem, (strpos($pubkeypem, $start)+strlen($start)), (strlen($pubkeypem) - strpos($pubkeypem, $end))*(-1));
         $der = base64_decode($pemtrim);
+
         return sha1($der);
     }
 
@@ -69,7 +71,6 @@ class RootCaBundleBuilder
 ## an Apache+mod_ssl webserver for SSL client authentication.
 ## Just configure this file as the SSLCACertificateFile.
 ##
-
 
 EOT;
         $caname = '';
@@ -108,6 +109,7 @@ EOT;
                 $caBundle .= $pem;
             }
         }
+
         return $caBundle;
     }
 
@@ -148,6 +150,7 @@ EOT;
                 exit(1);
             }
         }
+
         return $response;
     }
 
