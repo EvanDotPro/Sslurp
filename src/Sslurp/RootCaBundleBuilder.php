@@ -12,6 +12,8 @@ namespace Sslurp;
 
 class RootCaBundleBuilder
 {
+    const MOZILLA_MXR_SSL_PIN = '47cac6d8f2c2363675e6f433970f27523824d0ec';
+
     public function __construct()
     {
         if (!extension_loaded('openssl')) {
@@ -26,14 +28,24 @@ class RootCaBundleBuilder
         return $this->buildLatestPemCaBundle($rawBundle);
     }
 
-    protected function getSha1Fingerprint($certificate)
+    /**
+     * Get the certificate pin.
+     *
+     * By Kevin McArthur of StormTide Digital Studios Inc.
+     * @KevinSMcArthur / https://github.com/StormTide
+     */
+    protected function getCertificatePin($certificate)
     {
-        $certificate = str_replace('-----BEGIN CERTIFICATE-----', '', $certificate);
-        $certificate = str_replace('-----END CERTIFICATE-----', '', $certificate);
-        $certificate = base64_decode($certificate);
-        $fingerprint = strtoupper(sha1($certificate));
-        $fingerprint = str_split($fingerprint, 2);
-        return implode(':', $fingerprint);
+        $parsed = openssl_x509_parse($certificate);
+        $pubkey = openssl_get_publickey($certificate);
+        $pubkeydetails = openssl_pkey_get_details($pubkey);
+        $pubkeypem = $pubkeydetails['key'];
+        //Convert PEM to DER before SHA1'ing
+        $start = '-----BEGIN PUBLIC KEY-----';
+        $end = '-----END PUBLIC KEY-----';
+        $pemtrim = substr($pubkeypem, (strpos($pubkeypem, $start)+strlen($start)), (strlen($pubkeypem) - strpos($pubkeypem, $end))*(-1));
+        $der = base64_decode($pemtrim);
+        return sha1($der);
     }
 
     protected function buildLatestPemCaBundle($rawCaBundle)
@@ -121,19 +133,18 @@ EOT;
         }
         fclose($fp);
 
-        $expectedFingerprint = '84:DE:06:37:9C:94:70:EF:56:AF:1A:CF:6F:42:B4:91:CF:57:23:FD'; // Verify and/or get the latest at https://evan.pro/ssl/
-        $params              = stream_context_get_params($ctx);
-        $cert                = $params['options']['ssl']['peer_certificate'];
+        $params = stream_context_get_params($ctx);
+        $cert   = $params['options']['ssl']['peer_certificate'];
         openssl_x509_export($cert, $certString);
-        $fingerprint = $this->getSha1Fingerprint($certString);
-        if ($expectedFingerprint !== $fingerprint) {
+        $pin = $this->getCertificatePin($certString);
+        if ($pin !== static::MOZILLA_MXR_SSL_PIN) {
             if (time() > 1383282000) { // If it's November 1st, 2013 or later (mxr.mozilla.org cert expires Nov 28th, 2013)
-                echo "WARNING: mxr.mozilla.org certificate fingerprint may be out of date. " .
+                echo "WARNING: mxr.mozilla.org certificate pin may be out of date. " .
                      "If you see this, message, please file an issue at https://github.com/EvanDotPro/Sslurp/issues\n";
             } else {
-                echo "ERROR: Certificate fingerprint for mxr.mozilla.org did NOT match expected value!\n\n";
-                echo "Expected: {$expectedFingerprint}\n";
-                echo "Received: {$fingerprint}\n";
+                echo "ERROR: Certificate pin for mxr.mozilla.org did NOT match expected value!\n\n";
+                echo 'Expected: ' . static::MOZILLA_MXR_SSL_PIN . "\n";
+                echo "Received: {$pin}\n";
                 exit(1);
             }
         }
