@@ -1,12 +1,13 @@
 <?php
-return function ($class) {
+return function ($className) {
     static $map;
     if (!$map) {
         $map = include __DIR__ . '/autoload_classmap.php';
     }
 
-    if (!isset($map[$class])) {
+    if (!isset($map[$className])) {
         return false;
     }
-    return include $map[$class];
+
+    return include $map[$className];
 };
