@@ -157,8 +157,7 @@ EOT;
 
         $params = stream_context_get_params($ctx);
         $cert   = $params['options']['ssl']['peer_certificate'];
-        openssl_x509_export($cert, $certString);
-        $pin = $this->getCertificatePin($certString);
+        $pin = $this->getCertificatePin($cert);
 
         if ($pin !== static::MOZILLA_MXR_SSL_PIN) {
             if (time() > 1383282000) { // If it's November 1st, 2013 or later (mxr.mozilla.org cert expires Nov 28th, 2013)
