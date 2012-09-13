@@ -29,27 +29,6 @@ class RootCaBundleBuilder
         return $this->buildLatestPemCaBundle($rawBundle);
     }
 
-    /**
-     * Get the certificate pin.
-     *
-     * By Kevin McArthur of StormTide Digital Studios Inc.
-     * @KevinSMcArthur / https://github.com/StormTide
-     */
-    protected function getCertificatePin($certificate)
-    {
-        $parsed        = openssl_x509_parse($certificate);
-        $pubkey        = openssl_get_publickey($certificate);
-        $pubkeydetails = openssl_pkey_get_details($pubkey);
-        $pubkeypem     = $pubkeydetails['key'];
-        //Convert PEM to DER before SHA1'ing
-        $start         = '-----BEGIN PUBLIC KEY-----';
-        $end           = '-----END PUBLIC KEY-----';
-        $pemtrim       = substr($pubkeypem, (strpos($pubkeypem, $start)+strlen($start)), (strlen($pubkeypem) - strpos($pubkeypem, $end))*(-1));
-        $der           = base64_decode($pemtrim);
-
-        return sha1($der);
-    }
-
     protected function buildLatestPemCaBundle($rawCaBundle)
     {
         $rawCertData = explode("\n", $rawCaBundle);
@@ -156,8 +135,8 @@ EOT;
         fclose($fp);
 
         $params = stream_context_get_params($ctx);
-        $cert   = $params['options']['ssl']['peer_certificate'];
-        $pin = $this->getCertificatePin($cert);
+        $cert   = new X509Certificate($params['options']['ssl']['peer_certificate']);
+        $pin    = $cert->getPin();
 
         if ($pin !== static::MOZILLA_MXR_SSL_PIN) {
             if (time() > 1383282000) { // If it's November 1st, 2013 or later (mxr.mozilla.org cert expires Nov 28th, 2013)
