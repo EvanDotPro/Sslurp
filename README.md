@@ -2,6 +2,8 @@
 
 v0.1 by Evan Coury
 
+[![Build Status](https://secure.travis-ci.org/EvanDotPro/Sslurp.png?branch=master)](http://travis-ci.org/EvanDotPro/Sslurp)
+
 ## Introduction
 
 **WARNING:** This library is currently undergoing review and should not yet be
