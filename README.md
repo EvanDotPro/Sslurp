@@ -19,7 +19,7 @@ using --with-openssl[=DIR].
 
 ### CLI Root CA Bundle Updater
 
-[update-ca-bundle.php](https://github.com/EvanDotPro/Sslurp/blob/master/bin/update-ca-bundle.php)
+[update-ca-bundle](https://github.com/EvanDotPro/Sslurp/blob/master/bin/update-ca-bundle)
 is a handy command-line tool for fetching and building a PEM certificate bundle
 from the latest trusted CAs in the [Mozilla source
 tree](https://mxr.mozilla.org/mozilla/source/security/nss/lib/ckfw/builtins/certdata.txt).
@@ -35,7 +35,7 @@ authentic and has not been tampered with.
 Sslurp Root CA Bundle Updater
 
 Usage:
- ./update-ca-bundle.php [-o output_file]
+ ./update-ca-bundle [-o output_file]
 
 Options
  -o	Path/filename to the file to (over)write he update root CA bundle. Default to stdout.
