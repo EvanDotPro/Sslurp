@@ -22,17 +22,19 @@ class RootCaBundleBuilder
         }
     }
 
-    public function getUpdatedRootCaBundle()
+    public function getUpdatedRootCaBundle($rawCertData = false)
     {
-        $rawBundle = $this->fetchLatestRawCaBundle();
+        if (!$rawCertData) {
+            $rawCertData = $this->fetchLatestRawCertData();
+        }
 
-        return $this->buildLatestPemCaBundle($rawBundle);
+        return $this->buildLatestPemCaBundle($rawCertData);
     }
 
-    protected function buildLatestPemCaBundle($rawCaBundle)
+    protected function buildLatestPemCaBundle($rawCertData)
     {
-        $rawCertData = explode("\n", $rawCaBundle);
-        $currentDate = date(DATE_RFC822);
+        $rawCertData = explode("\n", $rawCertData);
+        $currentDate = defined('SSLURP_OVERRIDE_DATETIME') ? SSLURP_OVERRIDE_DATETIME : date(DATE_RFC822);
         $caBundle = <<<EOT
 ##
 ## Bundle of CA Root Certificates
@@ -106,7 +108,7 @@ EOT;
         return $caBundle;
     }
 
-    protected function fetchLatestRawCaBundle()
+    protected function fetchLatestRawCertData()
     {
         $ctx = stream_context_create(array('ssl' => array(
             'capture_peer_cert' => true,
