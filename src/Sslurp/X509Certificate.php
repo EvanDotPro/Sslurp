@@ -32,12 +32,22 @@ class X509Certificate
     private $publicKeyDetails;
 
     /**
-     * @param $certificate X.509 resource
+     * @param $certificate mixed X.509 resource, X.509 certificate string, or path to X.509 certificate file.
      */
     public function __construct($certificate)
     {
+        if (is_string($certificate)) {
+            if(is_readable($certificate)) {
+                $certificate = file_get_contents($certificate);
+            }
+            // We're surpressing errors here in favor of the more verbose exception below.
+            $certificate = @openssl_x509_read($certificate);
+        }
+
         if (@get_resource_type($certificate) !== 'OpenSSL X.509') {
-            throw new \InvalidArgumentException('Argument passed to constructor of %s must be an X.509 resource.');
+            throw new \InvalidArgumentException('Argument passed to constructor'
+                . ' of %s must be an X.509 resource, X.509 certificate string, or'
+                . ' valid path to an X.509 certificate.');
         }
 
         $this->certificate = $certificate;

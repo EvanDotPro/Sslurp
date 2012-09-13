@@ -1,0 +1,11 @@
+<phpunit bootstrap="../autoload_register.php" colors="true">
+    <testsuite name="Sslurp Test Suite">
+        <directory>./</directory>
+    </testsuite>
+
+    <filter>
+        <whitelist>
+            <directory suffix=".php">../src/</directory>
+        </whitelist>
+    </filter>
+</phpunit>
