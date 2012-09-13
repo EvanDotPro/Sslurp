@@ -37,7 +37,7 @@ class X509Certificate
     public function __construct($certificate)
     {
         if (is_string($certificate)) {
-            if(is_readable($certificate)) {
+            if (is_readable($certificate)) {
                 $certificate = file_get_contents($certificate);
             }
             // We're surpressing errors here in favor of the more verbose exception below.
