@@ -22,4 +22,10 @@ class X509CertificateTest extends TestCase
         $cert = new X509Certificate($certResource);
         $this->assertSame($cert->getPin(), $expectedPin);
     }
+
+    public function testInvalidConstructorArgumentThrowsException()
+    {
+        $this->setExpectedException('InvalidArgumentException');
+        $cert = new X509Certificate(123);
+    }
 }
