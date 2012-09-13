@@ -77,6 +77,7 @@ class X509Certificate
         if ($this->publicKey === null) {
             $this->publicKey = openssl_get_publickey($this->certificate);
         }
+
         return $this->publicKey;
     }
 
@@ -90,6 +91,7 @@ class X509Certificate
         if ($this->publicKeyDetails === null) {
             $this->publicKeyDetails = openssl_pkey_get_details($this->getPublicKey());
         }
+
         return $this->publicKeyDetails;
     }
 }
