@@ -17,7 +17,7 @@ module.
 most Linux distributions' PHP packages, else you need to ensure you compile
 using --with-openssl[=DIR].
 
-### CLI Root CA Bundle Updater
+### CLI root CA bundle updater
 
 [update-ca-bundle](https://github.com/EvanDotPro/Sslurp/blob/master/bin/update-ca-bundle)
 is a handy command-line tool for fetching and building a PEM certificate bundle

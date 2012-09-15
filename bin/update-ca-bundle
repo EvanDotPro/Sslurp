@@ -21,10 +21,14 @@ if (isset($opts['o']) && is_array($opts['o'])) {
     $opts['o'] = $opts['o'][0];
 } elseif (!isset($opts['o']) && isset($argv[1])) {
     $opts['o'] = $argv[1];
+} elseif (!isset($opts['o'])) {
+    $opts['o'] = null;
 }
 
-$caBundleBuilder = new Sslurp\RootCaBundleBuilder();
-$caBundle        = $caBundleBuilder->getUpdatedRootCaBundle();
+if ($opts['o'] == '-') $opts['o'] = null;
+
+$caRootPemBundle = new Sslurp\CaRootPemBundle();
+$caBundle        = $caRootPemBundle->getContent();
 
 if (!$caBundle) {
     echo "Sorry, there was an error building the latest root CA bundle.\n";
