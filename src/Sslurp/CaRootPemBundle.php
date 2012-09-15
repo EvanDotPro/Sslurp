@@ -33,6 +33,7 @@ class CaRootPemBundle extends AbstractCaRootData
         if ($this->pemContent === null) {
             $this->pemContent = $this->getUpdatedCaRootBundle();
         }
+
         return $this->pemContent;
     }
 
