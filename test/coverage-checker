@@ -26,11 +26,17 @@ foreach ($metrics as $metric) {
     $checkedElements += (int) $metric['coveredelements'];
 }
 
-$coverage = ($checkedElements / $totalElements) * 100;
+$coverage = round(($checkedElements / $totalElements) * 100);
+
+echo PHP_EOL;
 
 if ($coverage < $percentage) {
-    echo "\e[1;31mCode coverage is {$coverage}%, which is below the accepted {$percentage}%\e[0m" . PHP_EOL;
+    echo "\x1b[37;41m";
+    echo "Code coverage is {$coverage}%, which is below the accepted {$percentage}";
+    echo "\x1b[0m" . PHP_EOL . PHP_EOL;
     exit(1);
 }
 
-echo "\e[1;32mCode coverage is {$coverage}% - OK!\e[0m" . PHP_EOL;
+echo "\x1b[30;42m";
+echo "Code coverage is {$coverage}% - OK!";
+echo "\x1b[0m" . PHP_EOL . PHP_EOL;
