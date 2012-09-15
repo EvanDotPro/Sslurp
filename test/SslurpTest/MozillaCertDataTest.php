@@ -10,12 +10,23 @@ class MozillaCertDataTest extends TestCase
 {
     public function setUp()
     {
+        MozillaCertData::$overrideCertPin = null;
+        MozillaCertData::$overrideCertExp = null;
+        MozillaCertData::$forceAltCaBundle = null;
         $this->mozCertData = new MozillaCertData();
     }
 
     public function certData()
     {
         return file_get_contents(__DIR__ . '/_files/certdata.txt');
+    }
+
+    public function canDoOnlineTest()
+    {
+        if (!($fp = @stream_socket_client('tcp://mxr.mozilla.org:80', $errNo, $errStr, 1))) {
+            $this->markTestSkipped('Could not reach mxr.mozilla.org for online test.');
+        }
+        fclose($fp);
     }
 
     public function testContextOptionsAreSecureDefaults()
@@ -51,4 +62,42 @@ class MozillaCertDataTest extends TestCase
         $this->mozCertData->getVersion();
     }
 
+    public function testMozillaCertDataOnlineCheck()
+    {
+        $this->canDoOnlineTest();
+        $this->assertRegExp('/^\d+\.\d+$/', $this->mozCertData->getVersion());
+    }
+
+    public function testMozillaCertDataOnlineCheckWithInvalidPinThrowsException()
+    {
+        $this->canDoOnlineTest();
+        MozillaCertData::$overrideCertPin = 'invalid';
+        $this->setExpectedException('RuntimeException');
+        $this->mozCertData->getVersion();
+    }
+
+    public function testMozillaCertDataOnlineCheckWithNewCertificateShowsWarningMessage()
+    {
+        $this->canDoOnlineTest();
+        MozillaCertData::$overrideCertPin = 'invalid';
+        MozillaCertData::$overrideCertExp = time() - 100;
+        $this->setExpectedException('PHPUnit_Framework_Error_Notice');
+        $this->mozCertData->getVersion();
+    }
+
+    public function testMozillaCertDataOnlineCheckWithNewCertificateStillReturnsVersion()
+    {
+        $this->canDoOnlineTest();
+        MozillaCertData::$overrideCertPin = 'invalid';
+        MozillaCertData::$overrideCertExp = time() - 100;
+        $this->assertRegExp('/^\d+\.\d+$/', @$this->mozCertData->getVersion());
+    }
+
+    public function testMozillaCertDataOnlineFailsIfNoCaRootBundleFound()
+    {
+        $this->canDoOnlineTest();
+        MozillaCertData::$forceAltCaBundle = __DIR__ . '/_files/mxr.mozilla.org.pem';
+        $this->setExpectedException('RuntimeException');
+        $this->mozCertData->getVersion();
+    }
 }

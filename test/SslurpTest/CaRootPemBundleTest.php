@@ -14,12 +14,13 @@ class CaRootPemBundleTest extends TestCase
         $pemBundle = file_get_contents(__DIR__ . '/_files/ca-bundle.pem');
         $certData  = file_get_contents(__DIR__ . '/_files/certdata.txt');
         if ($newVersion) $certData = str_replace('1.85', '1.86', $certData);
+        CaRootPemBundle::$overrideDateTime = null;
         $this->bundle = new CaRootPemBundle($pemBundle, new MozillaCertData($certData));
     }
 
     public function testBuildsCaRootBundleProperly()
     {
-        define('SSLURP_OVERRIDE_DATETIME', 'for testing');
+        CaRootPemBundle::$overrideDateTime = 'for testing';
         $result = $this->bundle->getUpdatedCaRootBundle();
         $this->assertStringEqualsFile(__DIR__ . '/_files/ca-bundle.pem', $result);
     }
@@ -36,5 +37,12 @@ class CaRootPemBundleTest extends TestCase
         $this->assertTrue($this->bundle->isLatest());
         $this->setUp(true);
         $this->assertFalse($this->bundle->isLatest());
+    }
+
+    public function testCanFetchContentFromLiveServer()
+    {
+        require_once __DIR__ . '/TestAsset/MockMozillaCertData.php';
+        $bundle = new CaRootPemBundle(null, new TestAsset\MockMozillaCertData);
+        $this->assertNotNull($bundle->getContent());
     }
 }

@@ -19,6 +19,11 @@ class CaRootPemBundle extends AbstractCaRootData
      */
     private $pemContent = null;
 
+    /**
+     * Override for unit testing
+     */
+    public static $overrideDateTime = null;
+
     public function __construct($pemContent = null, MozillaCertData $mozCertData = null)
     {
         $this->pemContent  = $pemContent;
@@ -47,15 +52,10 @@ class CaRootPemBundle extends AbstractCaRootData
         return $this->buildBundle($this->mozCertData->getContent());
     }
 
-    public function getMozillaCertData()
-    {
-        return $this->mozCertData;
-    }
-
     protected function buildBundle($rawCertData)
     {
         $rawCertData = explode("\n", $rawCertData);
-        $currentDate = defined('SSLURP_OVERRIDE_DATETIME') ? SSLURP_OVERRIDE_DATETIME : date(DATE_RFC822);
+        $currentDate = static::$overrideDateTime ?: date(DATE_RFC822);
         $caBundle = <<<EOT
 ##
 ## Bundle of CA Root Certificates

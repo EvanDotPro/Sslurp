@@ -30,6 +30,13 @@ class MozillaCertData extends AbstractCaRootData
     private $context = null;
 
     /**
+     * Overrides for unit testing
+     */
+    public static $overrideCertPin  = null;
+    public static $overrideCertExp  = null;
+    public static $forceAltCaBundle = null;
+
+    /**
      * @param string $certData Used for unit testing
      */
     public function __construct($certData = null)
@@ -77,11 +84,17 @@ class MozillaCertData extends AbstractCaRootData
     {
         $ctx = $this->getStreamContext();
 
-        $fp = stream_socket_client('ssl://mxr.mozilla.org:443', $errNo, $errStr, 30, STREAM_CLIENT_CONNECT, $ctx);
+        set_error_handler(function ($code, $msg) {
+            throw new \RuntimeException($msg, $code);
+        });
 
-        if (!$fp) {
-            throw new \RuntimeException($errStr, $errNo);
+        try {
+            $fp = stream_socket_client('ssl://mxr.mozilla.org:443', $errNo, $errStr, 30, STREAM_CLIENT_CONNECT, $ctx);
+        } catch (\RuntimeException $e) {
+            throw new \RuntimeException($errStr, $errNo, $e);
         }
+
+        restore_error_handler();
 
         $headers  = "GET /mozilla/source/security/nss/lib/ckfw/builtins/certdata.txt?raw=1 HTTP/1.1\r\n";
         $headers .= "Host: mxr.mozilla.org\r\n";
@@ -97,18 +110,20 @@ class MozillaCertData extends AbstractCaRootData
 
         $params = stream_context_get_params($ctx);
         $cert   = new X509Certificate($params['options']['ssl']['peer_certificate']);
-        $pin    = $cert->getPin();
+        $pin    = static::$overrideCertPin ?: $cert->getPin();
+        // November 1st, 2013 or later (mxr.mozilla.org cert expires Nov 28th, 2013)
+        $exp    = static::$overrideCertExp ?: 1383282000;
 
         if ($pin !== static::MOZILLA_MXR_SSL_PIN) {
-            if (time() > 1383282000) { // If it's November 1st, 2013 or later (mxr.mozilla.org cert expires Nov 28th, 2013)
-                echo "WARNING: mxr.mozilla.org certificate pin may be out of date. " .
-                     "If you see this, message, please file an issue at https://github.com/EvanDotPro/Sslurp/issues\n";
-            } else {
-                echo "ERROR: Certificate pin for mxr.mozilla.org did NOT match expected value!\n\n";
-                echo 'Expected: ' . static::MOZILLA_MXR_SSL_PIN . "\n";
-                echo "Received: {$pin}\n";
-                exit(1);
+            if (time() < $exp) {
+                throw new \RuntimeException(sprintf(
+                   'ERROR: Certificate pin for mxr.mozilla.org did NOT match expected value! ' .
+                   'Expected: %s Received: %s', static::MOZILLA_MXR_SSL_PIN, $pin
+                ));
             }
+            trigger_error('WARNING: mxr.mozilla.org certificate pin may be out of date. ' .
+                'If you continue to see this message after updating Sslurp, please ' .
+                'file an issue at https://github.com/EvanDotPro/Sslurp/issues');
         }
 
         return $this->getResponseBody($response);
@@ -154,6 +169,6 @@ class MozillaCertData extends AbstractCaRootData
             }
         }
 
-        return $caBundle;
+        return (static::$forceAltCaBundle ?: $caBundle);
     }
 }
