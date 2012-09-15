@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 output=$(php php-cs-fixer.phar fix -v --no-interaction --dry-run --level=all .)
 echo ""
 if [[ $output ]]; then
