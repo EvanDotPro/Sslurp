@@ -44,5 +44,6 @@ class CaRootPemBundleTest extends TestCase
         require_once __DIR__ . '/TestAsset/MockMozillaCertData.php';
         $bundle = new CaRootPemBundle(null, new TestAsset\MockMozillaCertData);
         $this->assertNotNull($bundle->getContent());
+        $this->assertInstanceOf('Sslurp\MozillaCertData', $bundle->getMozillaCertData());
     }
 }

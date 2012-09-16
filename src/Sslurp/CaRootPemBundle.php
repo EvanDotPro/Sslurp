@@ -20,7 +20,14 @@ class CaRootPemBundle extends AbstractCaRootData
     private $pemContent = null;
 
     /**
+     * @var MozillaCertData
+     */
+    private $mozCertData = null;
+
+    /**
      * Override for unit testing
+     *
+     * @var string
      */
     public static $overrideDateTime = null;
 
@@ -44,6 +51,11 @@ class CaRootPemBundle extends AbstractCaRootData
         }
 
         return $this->pemContent;
+    }
+
+    public function getMozillaCertData()
+    {
+        return $this->mozCertData;
     }
 
     public function isLatest()
