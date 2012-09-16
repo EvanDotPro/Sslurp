@@ -9,5 +9,5 @@ before_install:
 
 script:
  - phpunit -c test/phpunit.xml
- - ./test/coverage-checker test/clover.xml 95
+ - ./test/coverage-checker test/clover.xml 100
  - ./test/cs-checker
