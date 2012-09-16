@@ -49,10 +49,13 @@ class MozillaCertDataTest extends TestCase
         $this->assertSame('1.85', $this->mozCertData->getVersion());
     }
 
-    public function testCertDataPassedToConstructorIsReturnedFromGetCertData()
+    public function testExpectedCertDataReturnedFromGetContent()
     {
         $this->mozCertData = new MozillaCertData('foo');
         $this->assertEquals('foo', $this->mozCertData->getContent());
+        require_once __DIR__ . '/TestAsset/MockMozillaCertDataFetchLatest.php';
+        $this->mozCertData = new TestAsset\MockMozillaCertDataFetchLatest();
+        $this->assertEquals('latest', $this->mozCertData->getContent());
     }
 
     public function testExceptionThrownIfCertDataIsInvalid()

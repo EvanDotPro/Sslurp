@@ -49,8 +49,17 @@ class MozillaCertData extends AbstractCaRootData
      *
      * @return string
      */
-    public function getContent()
+    public function getContent($until = false)
     {
+        if ($until) {
+            // don't cache the partial fetch for version check
+            if ($this->certData) {
+                return substr($this->certData, 0, strpos($this->certData, "\n", strpos($this->certData, $until)));
+            }
+
+            return $this->fetchLatestCertData($until);
+        }
+
         if ($this->certData === null) {
             $this->certData = $this->fetchLatestCertData();
         }
@@ -67,7 +76,7 @@ class MozillaCertData extends AbstractCaRootData
      */
     public function getStreamContext()
     {
-        if (! $this->context) {
+        if (!$this->context) {
             $this->context = stream_context_create(array('ssl' => array(
                 'capture_peer_cert' => true,
                 'verify_peer'       => true,
@@ -80,7 +89,7 @@ class MozillaCertData extends AbstractCaRootData
         return $this->context;
     }
 
-    protected function fetchLatestCertData()
+    protected function fetchLatestCertData($until = false)
     {
         $ctx = $this->getStreamContext();
 
@@ -105,6 +114,9 @@ class MozillaCertData extends AbstractCaRootData
         $response = '';
         while (!feof($fp)) {
             $response .= fgets($fp);
+            if ($until && strpos($response, $until) !== false) {
+                break;
+            }
         }
         fclose($fp);
 

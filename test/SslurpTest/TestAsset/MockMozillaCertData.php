@@ -6,7 +6,7 @@ use Sslurp\MozillaCertData;
 
 class MockMozillaCertData extends MozillaCertData
 {
-    public function getContent()
+    public function getContent($until = false)
     {
         return 'foo';
     }

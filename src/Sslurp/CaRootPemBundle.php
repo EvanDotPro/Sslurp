@@ -33,10 +33,14 @@ class CaRootPemBundle extends AbstractCaRootData
     /**
      * Return the content of the PEM bundle
      */
-    public function getContent()
+    public function getContent($until = false)
     {
         if ($this->pemContent === null) {
             $this->pemContent = $this->getUpdatedCaRootBundle();
+        }
+
+        if ($until) {
+            return substr($this->pemContent, 0, strpos($this->pemContent, "\n", strpos($this->pemContent, $until)));
         }
 
         return $this->pemContent;
@@ -44,7 +48,7 @@ class CaRootPemBundle extends AbstractCaRootData
 
     public function isLatest()
     {
-        return $this->getVersion() == $this->mozCertData->getVersion();
+        return $this->getVersion() === $this->mozCertData->getVersion();
     }
 
     public function getUpdatedCaRootBundle()

@@ -39,7 +39,7 @@ class CaRootPemBundleTest extends TestCase
         $this->assertFalse($this->bundle->isLatest());
     }
 
-    public function testCanFetchContentFromLiveServer()
+    public function testWillFetchMozillaCertData()
     {
         require_once __DIR__ . '/TestAsset/MockMozillaCertData.php';
         $bundle = new CaRootPemBundle(null, new TestAsset\MockMozillaCertData);

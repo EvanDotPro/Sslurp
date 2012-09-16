@@ -37,7 +37,7 @@ abstract class AbstractCaRootData
     public function getVersion()
     {
         if ($this->version === null) {
-            if (preg_match('/^#?\s?(CVS_ID\s+\".*\")/m', $this->getContent(), $match)) {
+            if (preg_match('/^#?\s?(CVS_ID\s+\".*\")/m', $this->getContent('CVS_ID'), $match)) {
                 $parts = explode(' ', $match[1]);
                 $this->version = $parts[6];
                 $this->dateTime = new DateTime($parts[9] . ' ' . $parts[10], new DateTimeZone('UTC'));
@@ -63,5 +63,5 @@ abstract class AbstractCaRootData
         return $this->dateTime;
     }
 
-    abstract protected function getContent();
+    abstract public function getContent($until = false);
 }
