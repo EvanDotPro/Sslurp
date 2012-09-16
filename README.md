@@ -28,7 +28,7 @@ The `./bin/update-ca-bundle` CLI tool will "just work" out of the box.
 Sslurp can _easily_ be used in any existing project, framework, or library.
 
 To use Sslurp as a library in your project, the easiest method is to simply
-include the `autoload\_register.php` file:
+include the `autoload_register.php` file:
 
 ```php
 require_once 'vendor/Sslurp/autoload_register.php';
@@ -96,7 +96,7 @@ if ($bundle->isLatest()) {
 } else {
     echo 'WARNING! Your CA root bundle is out of date!' . PHP_EOL
        . 'Local CA root bundle is version ' . $bundle->getVersion() . '. '
-       . 'Latest version is version ' . $bundle->getMozillaCertData()->getVersion() . '.' . PHP_EOL;
+       . 'Latest version available from Mozilla is ' . $bundle->getMozillaCertData()->getVersion() . '.' . PHP_EOL;
 
     echo 'Updating...';
     file_put_contents('ca-bundle.pem', $bundle->getUpdatedCaRootBundle());
