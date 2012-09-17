@@ -10,30 +10,28 @@
  */
 namespace Sslurp;
 
+use SplFileObject;
+
 class CaRootPemBundle extends AbstractCaRootData
 {
     /**
-     * The content of the PEM bundle
-     *
+     * @var SplFileObject
+     */
+    protected $fileObject = null;
+
+    /**
      * @var string
      */
-    private $pemContent = null;
+    protected $pemContent = null;
 
     /**
      * @var MozillaCertData
      */
-    private $mozCertData = null;
+    protected $mozCertData = null;
 
-    /**
-     * Override for unit testing
-     *
-     * @var string
-     */
-    public static $overrideDateTime = null;
-
-    public function __construct($pemContent = null, MozillaCertData $mozCertData = null)
+    public function __construct($filename = null, MozillaCertData $mozCertData = null)
     {
-        $this->pemContent  = $pemContent;
+        $this->fileObject  = new SplFileObject($filename, 'r+');
         $this->mozCertData = $mozCertData ?: new MozillaCertData();
     }
 
@@ -43,7 +41,9 @@ class CaRootPemBundle extends AbstractCaRootData
     public function getContent($until = false)
     {
         if ($this->pemContent === null) {
-            $this->pemContent = $this->getUpdatedCaRootBundle();
+            $this->pemContent = '';
+            while (!$this->fileObject->eof()) $this->pemContent .= $this->fileObject->fgets();
+            //$this->pemContent = $this->fileObject->getUpdatedCaRootBundle();
         }
 
         if ($until) {
@@ -71,20 +71,22 @@ class CaRootPemBundle extends AbstractCaRootData
     protected function buildBundle($rawCertData)
     {
         $rawCertData = explode("\n", $rawCertData);
-        $currentDate = static::$overrideDateTime ?: date(DATE_RFC822);
+        $currentDate = date(DATE_ISO8601);
         $caBundle = <<<EOT
 ##
 ## Bundle of CA Root Certificates
 ##
-## Generated $currentDate
 ## Generated with Sslurp (https://github.com/EvanDotPro/Sslurp)
 ##
-## This is a bundle of X.509 certificates of public Certificate Authorities
-## (CA). These were automatically extracted from Mozilla's root certificates
-## file (certdata.txt).  This file can be found in the mozilla source tree:
-## '/mozilla/security/nss/lib/ckfw/builtins/certdata.txt'
+## This is a bundle of X.509 certificates of public Certificate Authorities.
+## These were automatically extracted from Mozilla's root certificates
+## file (certdata.txt). This file can be found in the Mozilla source tree:
+## /mozilla/source/security/nss/lib/ckfw/builtins/certdata.txt
 ##
-## It contains the certificates in PEM format and therefore
+## http://www.mozilla.org/projects/security/certs/policy/
+## http://www.mozilla.org/projects/security/pki/nss/
+##
+## This file contains the certificates in PEM format and therefore
 ## can be directly used with curl / libcurl / php_curl, or with
 ## an Apache+mod_ssl webserver for SSL client authentication.
 ## Just configure this file as the SSLCACertificateFile.
@@ -99,7 +101,7 @@ EOT;
 
             $line = rtrim($line);
 
-            if (preg_match('/^(CVS_ID\s+\".*\")/', $line, $match)) {
+            if (preg_match('/^CVS_ID\s+\"(.*)\"/', $line, $match)) {
                 $caBundle .= "# {$match[1]}\n";
             }
 

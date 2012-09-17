@@ -2,8 +2,8 @@
 namespace SslurpTest;
 
 use PHPUnit_Framework_TestCase as TestCase;
-use Sslurp\CaRootPemBundle;
-use Sslurp\MozillaCertData;
+use SslurpTest\TestAsset\MockMozillaCertData as MozillaCertData;
+use SslurpTest\TestAsset\MockCaRootPemBundle as CaRootPemBundle;
 use DateTime;
 use DateTimeZone;
 
@@ -11,16 +11,11 @@ class CaRootPemBundleTest extends TestCase
 {
     public function setUp($newVersion = false)
     {
-        $pemBundle = file_get_contents(__DIR__ . '/_files/ca-bundle.pem');
-        $certData  = file_get_contents(__DIR__ . '/_files/certdata.txt');
-        if ($newVersion) $certData = str_replace('1.85', '1.86', $certData);
-        CaRootPemBundle::$overrideDateTime = null;
-        $this->bundle = new CaRootPemBundle($pemBundle, new MozillaCertData($certData));
+        $this->bundle = new CaRootPemBundle(__DIR__ . '/_files/ca-bundle.pem', new MozillaCertData);
     }
 
     public function testBuildsCaRootBundleProperly()
     {
-        CaRootPemBundle::$overrideDateTime = 'for testing';
         $result = $this->bundle->getUpdatedCaRootBundle();
         $this->assertStringEqualsFile(__DIR__ . '/_files/ca-bundle.pem', $result);
     }
@@ -35,15 +30,14 @@ class CaRootPemBundleTest extends TestCase
     public function testIsLatestMethodWorks()
     {
         $this->assertTrue($this->bundle->isLatest());
-        $this->setUp(true);
+        $this->bundle = new CaRootPemBundle(__DIR__ . '/_files/ca-bundle.pem', new MozillaCertData);
+        $this->bundle->setPemContent(str_replace('1.85', '1.86', $this->bundle->getContent()));
         $this->assertFalse($this->bundle->isLatest());
     }
 
     public function testWillFetchMozillaCertData()
     {
-        require_once __DIR__ . '/TestAsset/MockMozillaCertData.php';
-        $bundle = new CaRootPemBundle(null, new TestAsset\MockMozillaCertData);
-        $this->assertNotNull($bundle->getContent());
-        $this->assertInstanceOf('Sslurp\MozillaCertData', $bundle->getMozillaCertData());
+        $this->assertNotNull($this->bundle->getContent());
+        $this->assertInstanceOf('Sslurp\MozillaCertData', $this->bundle->getMozillaCertData());
     }
 }

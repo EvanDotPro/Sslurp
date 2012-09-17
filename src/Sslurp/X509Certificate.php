@@ -19,17 +19,22 @@ class X509Certificate
     /**
      * @var X.509 resource
      */
-    private $certificate;
+    protected $certificate;
+
+    /**
+     * @var string
+     */
+    protected $pin;
 
     /**
      * @var resource
      */
-    private $publicKey;
+    protected $publicKey;
 
     /**
      * @var array
      */
-    private $publicKeyDetails;
+    protected $publicKeyDetails;
 
     /**
      * @param $certificate mixed X.509 resource, X.509 certificate string, or path to X.509 certificate file.
@@ -65,15 +70,18 @@ class X509Certificate
      */
     public function getPin()
     {
-        $pubkeydetails = $this->getPublicKeyDetails();
-        $pubkeypem     = $pubkeydetails['key'];
-        //Convert PEM to DER before SHA1'ing
-        $start         = '-----BEGIN PUBLIC KEY-----';
-        $end           = '-----END PUBLIC KEY-----';
-        $pemtrim       = substr($pubkeypem, (strpos($pubkeypem, $start) + strlen($start)), (strlen($pubkeypem) - strpos($pubkeypem, $end)) * (-1));
-        $der           = base64_decode($pemtrim);
+        if ($this->pin === null) {
+            $pubkeydetails = $this->getPublicKeyDetails();
+            $pubkeypem     = $pubkeydetails['key'];
+            //Convert PEM to DER before SHA1'ing
+            $start         = '-----BEGIN PUBLIC KEY-----';
+            $end           = '-----END PUBLIC KEY-----';
+            $pemtrim       = substr($pubkeypem, (strpos($pubkeypem, $start) + strlen($start)), (strlen($pubkeypem) - strpos($pubkeypem, $end)) * (-1));
+            $der           = base64_decode($pemtrim);
+            $this->pin     = sha1($der);
+        }
 
-        return sha1($der);
+        return $this->pin;
     }
 
     /**

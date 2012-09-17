@@ -20,29 +20,27 @@ abstract class AbstractCaRootData
      *
      * @var string
      */
-    private $version = null;
+    protected $version = null;
 
     /**
-     * The date/time of the version commit
+     * The date/time of the certdataversion
      *
      * @var DateTime
      */
-    private $dateTime = null;
+    protected $dateTime = null;
 
     /**
-     * Get the version number
+     * Get the version number according to CVS.
      *
      * @return string
      */
     public function getVersion()
     {
         if ($this->version === null) {
-            if (preg_match('/^#?\s?(CVS_ID\s+\".*\")/m', $this->getContent('CVS_ID'), $match)) {
-                $parts = explode(' ', $match[1]);
-                $this->version = $parts[6];
-                $this->dateTime = new DateTime($parts[9] . ' ' . $parts[10], new DateTimeZone('UTC'));
+            if (preg_match('/^.*\$Revision: ([\d\.]+)/m', $this->getContent('Revision:'), $match)) {
+                $this->version = $match[1];
             } else {
-                throw new \RuntimeException('Unable to detect CVS version ID.');
+                throw new \RuntimeException('Unable to detect revesion ID.');
             }
         }
 
@@ -50,14 +48,18 @@ abstract class AbstractCaRootData
     }
 
     /**
-     * Get the date/time of the last update
+     * Get the date/time the certdata was modified by Mozilla according to CVS.
      *
      * @return DateTime
      */
     public function getDateTime()
     {
         if ($this->dateTime === null) {
-            $this->getVersion();
+            if (preg_match('/^.*\$Date: ([\d\/-]+\s+[\d:]+)/m', $this->getContent('Date:'), $match)) {
+                $this->dateTime = new DateTime($match[1], new DateTimeZone('UTC'));
+            } else {
+                throw new \RuntimeException('Unable to detect revision date.');
+            }
         }
 
         return $this->dateTime;

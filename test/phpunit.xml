@@ -1,4 +1,4 @@
-<phpunit bootstrap="../autoload_register.php" colors="true">
+<phpunit bootstrap="./bootstrap.php" colors="true">
     <testsuite name="Sslurp Test Suite">
         <directory>./</directory>
     </testsuite>

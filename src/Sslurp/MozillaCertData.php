@@ -14,35 +14,21 @@ class MozillaCertData extends AbstractCaRootData
 {
     // mxr.mozilla.org cert expires Nov 28th, 2013
     const MOZILLA_MXR_SSL_PIN = '47cac6d8f2c2363675e6f433970f27523824d0ec';
+    const MOZILLA_MXR_SSL_EXP = 1383282000; // Nov 1st, 2013
 
     /**
      * certdata.txt contents
      *
      * @var string
      */
-    private $certData = null;
+    protected $certData = null;
 
     /**
      * Stream context
      *
      * @var resource
      */
-    private $context = null;
-
-    /**
-     * Overrides for unit testing
-     */
-    public static $overrideCertPin  = null;
-    public static $overrideCertExp  = null;
-    public static $forceAltCaBundle = null;
-
-    /**
-     * @param string $certData Used for unit testing
-     */
-    public function __construct($certData = null)
-    {
-        $this->certData = $certData;
-    }
+    protected $context = null;
 
     /**
      * Get the raw certdata.txt contents from mxr.mozilla.org
@@ -53,7 +39,7 @@ class MozillaCertData extends AbstractCaRootData
     {
         if ($until) {
             // don't cache the partial fetch for version check
-            if ($this->certData) {
+            if ($this->certData !== null) {
                 return substr($this->certData, 0, strpos($this->certData, "\n", strpos($this->certData, $until)));
             }
 
@@ -122,12 +108,10 @@ class MozillaCertData extends AbstractCaRootData
 
         $params = stream_context_get_params($ctx);
         $cert   = new X509Certificate($params['options']['ssl']['peer_certificate']);
-        $pin    = static::$overrideCertPin ?: $cert->getPin();
-        // November 1st, 2013 or later (mxr.mozilla.org cert expires Nov 28th, 2013)
-        $exp    = static::$overrideCertExp ?: 1383282000;
+        $pin    = $cert->getPin();
 
         if ($pin !== static::MOZILLA_MXR_SSL_PIN) {
-            if (time() < $exp) {
+            if (time() < static::MOZILLA_MXR_SSL_EXP) {
                 throw new \RuntimeException(sprintf(
                    'ERROR: Certificate pin for mxr.mozilla.org did NOT match expected value! ' .
                    'Expected: %s Received: %s', static::MOZILLA_MXR_SSL_PIN, $pin
@@ -167,20 +151,6 @@ class MozillaCertData extends AbstractCaRootData
 
     protected function getRootCaBundlePath()
     {
-        $caBundlePaths = array(
-            '/etc/pki/tls/certs/ca-bundle.crt',
-            '/etc/ssl/certs/ca-certificates.crt',
-            '/etc/ssl/ca-bundle.pem',
-            '/usr/share/ssl/certs/ca-bundle.crt',
-            __DIR__ . '/../../data/Equifax_Secure_Ca.pem',
-        );
-
-        foreach ($caBundlePaths as $caBundle) {
-            if (is_readable($caBundle)) {
-                break;
-            }
-        }
-
-        return (static::$forceAltCaBundle ?: $caBundle);
+        return Sslurp::getSystemCaRootBundlePath() ?: __DIR__ . '/../../data/Equifax_Secure_Ca.pem';
     }
 }
