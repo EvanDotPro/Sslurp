@@ -80,11 +80,7 @@ class MozillaCertData extends AbstractCaRootData
         $ctx = $this->getStreamContext();
 
         set_error_handler(function ($code, $message, $filename, $lineno, $context) {
-            if ($error_reporting() & $level) {
-                throw new \ErrorException(sprintf('%s: %s in %s line %d', $code, $message, $filename, $lineno), $code, 0, $filename, $lineno);
-            }
-
-            return false;
+            throw new \ErrorException(sprintf('%s: %s in %s line %d', $code, $message, $filename, $lineno), $code, 0, $filename, $lineno);
         });
 
         try {
