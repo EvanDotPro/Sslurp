@@ -40,7 +40,7 @@ abstract class AbstractCaRootData
             if (preg_match('/^.*\$Revision: ([\d\.]+)/m', $this->getContent('Revision:'), $match)) {
                 $this->version = $match[1];
             } else {
-                throw new \RuntimeException('Unable to detect revesion ID.');
+                throw new \RuntimeException('Unable to detect revision ID.');
             }
         }
 
