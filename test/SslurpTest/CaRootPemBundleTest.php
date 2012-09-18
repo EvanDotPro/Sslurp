@@ -40,4 +40,12 @@ class CaRootPemBundleTest extends TestCase
         $this->assertNotNull($this->bundle->getContent());
         $this->assertInstanceOf('Sslurp\MozillaCertData', $this->bundle->getMozillaCertData());
     }
+
+    public function testWillCreateBundleFileIfItDoesNotExist()
+    {
+        $file = sys_get_temp_dir() . '/ca-bundle.pem';
+        $this->assertFileNotExists($file);
+        $this->bundle = new CaRootPemBundle($file, new MozillaCertData);
+        $this->assertFileExists($file);
+    }
 }
