@@ -15,7 +15,8 @@
         }
     ],
     "require": {
-        "php": ">=5.3"
+        "php": ">=5.3",
+        "ext-openssl": "*"
     },
     "autoload": {
         "psr-0": {
