@@ -25,10 +25,10 @@ if (isset($opts['o']) && is_array($opts['o'])) {
     $opts['o'] = null;
 }
 
-if ($opts['o'] == '-') $opts['o'] = null;
+if ($opts['o'] == '-') $opts['o'] = 'ca-bundle.pem';
 
-$caRootPemBundle = new Sslurp\CaRootPemBundle();
-$caBundle        = $caRootPemBundle->getContent();
+$caRootPemBundle = new Sslurp\CaRootPemBundle($opts['o']);
+$caBundle        = $caRootPemBundle->getUpdatedCaRootBundle();
 
 if (!$caBundle) {
     echo "Sorry, there was an error building the latest root CA bundle.\n";

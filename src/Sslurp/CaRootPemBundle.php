@@ -31,6 +31,9 @@ class CaRootPemBundle extends AbstractCaRootData
 
     public function __construct($filename = null, MozillaCertData $mozCertData = null)
     {
+        if (!file_exists($filename)) {
+            touch($filename);
+        }
         $this->fileObject  = new SplFileObject($filename, 'r+');
         $this->mozCertData = $mozCertData ?: new MozillaCertData();
     }
