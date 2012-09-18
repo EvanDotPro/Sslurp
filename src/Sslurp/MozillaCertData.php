@@ -79,13 +79,18 @@ class MozillaCertData extends AbstractCaRootData
     {
         $ctx = $this->getStreamContext();
 
-        set_error_handler(function ($code, $msg) {
-            throw new \RuntimeException($msg, $code);
+        set_error_handler(function ($code, $message, $filename, $lineno, $context) {
+            if ($error_reporting() & $level) {
+                throw new \ErrorException(sprintf('%s: %s in %s line %d', $code, $message, $filename, $lineno), $code, 0, $filename, $lineno);
+            }
+
+            return false;
         });
 
         try {
             $fp = stream_socket_client('ssl://mxr.mozilla.org:443', $errNo, $errStr, 30, STREAM_CLIENT_CONNECT, $ctx);
-        } catch (\RuntimeException $e) {
+        } catch (\ErrorException $e) {
+            restore_error_handler();
             throw new \RuntimeException($errStr, $errNo, $e);
         }
 
