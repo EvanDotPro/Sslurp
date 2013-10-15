@@ -74,7 +74,6 @@ class CaRootPemBundle extends AbstractCaRootData
     protected function buildBundle($rawCertData)
     {
         $rawCertData = explode("\n", $rawCertData);
-        $currentDate = date(DATE_ISO8601);
         $caBundle = <<<EOT
 ##
 ## Bundle of CA Root Certificates
