@@ -34,10 +34,12 @@ As if that's not enough, Sslurp _additionally_ makes use of [public key pinning]
 Sslurp Root CA Bundle Updater
 
 Usage:
- ./update-ca-bundle [-o output_file]
+ bin/update-ca-bundle [--stdout]
+ bin/update-ca-bundle -o[output_file]
 
 Options
- -o	Path/filename to the file to (over)write he update root CA bundle. Default to stdout.
+ -o      	Path/filename to the file to (over)write the updated root CA bundle. Defaults to ca-bundle.pem
+ --stdout	Do not write file, send output to stdout instead.
 ```
 
 ### Using Sslurp as a library
