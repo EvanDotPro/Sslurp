@@ -39,5 +39,5 @@ if (!isset($opts['o']) || $opts['o'] == '-') {
     echo $caBundle;
 } else {
     file_put_contents($opts['o'], $caBundle);
-    echo "Updated root CA bundle written to {$opts['o']}.\n";
+    echo "Updated root CA bundle written to {$opts['o']}\n";
 }
