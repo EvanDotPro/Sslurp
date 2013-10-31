@@ -7,37 +7,46 @@ $help = <<<help
 Sslurp Root CA Bundle Updater
 
 Usage:
- {$argv[0]} [-o output_file]
+ {$argv[0]} [--stdout]
+ {$argv[0]} -o[output_file]
 
 Options
- -o\tPath/filename to the file to (over)write he update root CA bundle. Defaults to - (stdout).
+ -o      \tPath/filename to the file to (over)write the updated root CA bundle. Defaults to ca-bundle.pem
+ --stdout\tDo not write file, send output to stdout instead.
 
 Sslurp home page: https://github.com/EvanDotPro/Sslurp
 help;
 
-$opts = getopt('o::');
-if (isset($opts['o']) && is_array($opts['o'])) {
+$opts = getopt('o::h', array('stdout'));
+
+if (isset($opts['h'])) {
+    echo $help . "\n\n";
+    exit(0);
+}
+if (isset($opts['stdout']) || !isset($opts['o'])) {
+    $opts['stdout'] = true;
+} elseif (isset($opts['o']) && is_array($opts['o'])) {
     echo "WARNING: Multiple output paths given; ignoring all but the first value provided: `{$opts['o'][0]}`\n\n";
     $opts['o'] = $opts['o'][0];
-} elseif (!isset($opts['o']) && isset($argv[1])) {
-    $opts['o'] = $argv[1];
-} elseif (!isset($opts['o'])) {
-    $opts['o'] = null;
+} elseif (empty($opts['o'])) {
+    $opts['o'] = 'ca-bundle.pem';
 }
 
-if ($opts['o'] == '-') $opts['o'] = 'ca-bundle.pem';
+try {
+    $caRootPemBundle = new Sslurp\CaRootPemBundle(isset($opts['stdout']) ? 'php://temp' : $opts['o']);
+    $caBundle        = $caRootPemBundle->getUpdatedCaRootBundle();
+} catch (Exception $e) {}
 
-$caRootPemBundle = new Sslurp\CaRootPemBundle($opts['o']);
-$caBundle        = $caRootPemBundle->getUpdatedCaRootBundle();
-
-if (!$caBundle) {
+if (empty($caBundle)) {
     echo "Sorry, there was an error building the latest root CA bundle.\n";
+    if (!empty($e)) {
+        echo $e->getMessage() . "\n";
+    }
     exit(1);
 }
 
-if (!isset($opts['o']) || $opts['o'] == '-') {
+if (isset($opts['stdout'])) {
     echo $caBundle;
 } else {
-    file_put_contents($opts['o'], $caBundle);
-    echo "Updated root CA bundle written to {$opts['o']}.\n";
+    echo "Updated root CA bundle written to {$opts['o']}\n";
 }

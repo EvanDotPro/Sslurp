@@ -29,7 +29,7 @@ class CaRootPemBundle extends AbstractCaRootData
      */
     protected $mozCertData = null;
 
-    public function __construct($filename = null, MozillaCertData $mozCertData = null)
+    public function __construct($filename, MozillaCertData $mozCertData = null)
     {
         if (!file_exists($filename)) {
             touch($filename);
