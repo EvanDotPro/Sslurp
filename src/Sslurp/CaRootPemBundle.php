@@ -134,6 +134,7 @@ EOT;
         return $caBundle;
     }
 
+    // @TODO: This needs to be revisited.
     protected function buildPemString($caName, $data)
     {
         return "\n{$caName}\n"
