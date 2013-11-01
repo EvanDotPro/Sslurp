@@ -123,7 +123,23 @@ class MozillaCertData extends AbstractCaRootData
                 'file an issue at https://github.com/EvanDotPro/Sslurp/issues');
         }
 
-        return $this->getResponseBody($response);
+        return $this->decodeChunkedString($this->getResponseBody($response));
+    }
+
+    protected function decodeChunkedString($string)
+    {
+        $result       = '';
+        $currentPos   = 0;
+        $stringLength = strlen($string);
+
+        while ($currentPos < $stringLength) {
+            $position    = strpos($string, "\r\n", $currentPos);
+            $length      = hexdec(substr($string, $currentPos, $position - $currentPos));
+            $result     .= substr($string, $position + 2, $length);
+            $currentPos  = $position + 2;
+        }
+
+        return $result;
     }
 
     protected function getResponseBody($string)
