@@ -12,9 +12,9 @@ namespace Sslurp;
 
 class MozillaCertData extends AbstractCaRootData
 {
-    // mxr.mozilla.org cert expires Nov 28th, 2013
-    const MOZILLA_MXR_SSL_PIN = '47cac6d8f2c2363675e6f433970f27523824d0ec';
-    const MOZILLA_MXR_SSL_EXP = 1383282000; // Nov 1st, 2013
+    // mxr.mozilla.org cert expires Mar 25th, 2015
+    const MOZILLA_MXR_SSL_PIN = 'b4e6e7a3d911b5a09a9835f525122acfa1442a3b';
+    const MOZILLA_MXR_SSL_EXP = 1425186000; // Mar 1st, 2015
 
     /**
      * certdata.txt contents
