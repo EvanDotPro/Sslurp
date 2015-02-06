@@ -45,7 +45,9 @@ class CaRootPemBundle extends AbstractCaRootData
     {
         if ($this->pemContent === null) {
             $this->pemContent = '';
-            while (!$this->fileObject->eof()) $this->pemContent .= $this->fileObject->fgets();
+            while (!$this->fileObject->eof()) {
+                $this->pemContent .= $this->fileObject->fgets();
+            }
             //$this->pemContent = $this->fileObject->getUpdatedCaRootBundle();
         }
 
