@@ -7,7 +7,7 @@ php:
   - 5.6
 
 before_install:
- - wget -q http://cs.sensiolabs.org/get/php-cs-fixer.phar
+ - wget -q http://get.sensiolabs.org/php-cs-fixer.phar
 
 script:
  - phpunit -c test/phpunit.xml
