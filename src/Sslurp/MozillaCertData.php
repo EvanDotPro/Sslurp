@@ -31,6 +31,36 @@ class MozillaCertData extends AbstractCaRootData
     protected $context = null;
 
     /**
+     * Option name
+     *
+     * @var string
+     */
+    private $peerNameOption;
+
+    /**
+     * Set the name of the peet_name / CN_match ssl context option
+     * depending on the PHP version.
+     */
+    public function __construct()
+    {
+        if (version_compare(PHP_VERSION, '5.6', '>=')) {
+            $this->peerNameOption = 'peer_name';
+        } else {
+            $this->peerNameOption = 'CN_match';
+        }
+    }
+
+    /**
+     * Get the name of the peer_name /CN_match option
+     *
+     * @return string
+     */
+    public function getPeerNameOption()
+    {
+        return $this->peerNameOption;
+    }
+
+    /**
      * Get the raw certdata.txt contents from mxr.mozilla.org
      *
      * @return string
@@ -64,11 +94,11 @@ class MozillaCertData extends AbstractCaRootData
     {
         if (!$this->context) {
             $this->context = stream_context_create(array('ssl' => array(
-                'capture_peer_cert' => true,
-                'verify_peer'       => true,
-                'allow_self_signed' => false,
-                'cafile'            => $this->getRootCaBundlePath(),
-                'CN_match'          => 'mxr.mozilla.org',
+                'capture_peer_cert'         => true,
+                'verify_peer'               => true,
+                'allow_self_signed'         => false,
+                'cafile'                    => $this->getRootCaBundlePath(),
+                $this->getPeerNameOption()  => 'mxr.mozilla.org',
             )));
         }
 
