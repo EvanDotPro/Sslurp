@@ -22,5 +22,11 @@
         "psr-0": {
             "Sslurp": "src/"
         }
+    },
+    "bin": {
+        "bin": ["bin/update-ca-bundle"]
+    },
+    "config": {
+        "bin-dir": "bin"
     }
 }
