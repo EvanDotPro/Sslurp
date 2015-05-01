@@ -12,9 +12,9 @@ namespace Sslurp;
 
 class MozillaCertData extends AbstractCaRootData
 {
-    // mxr.mozilla.org cert expires Mar 25th, 2015
+    // mxr.mozilla.org cert expires Mar 31st, 2016
     const MOZILLA_MXR_SSL_PIN = 'b4e6e7a3d911b5a09a9835f525122acfa1442a3b';
-    const MOZILLA_MXR_SSL_EXP = 1425186000; // Mar 1st, 2015
+    const MOZILLA_MXR_SSL_EXP = 1459425600; // Mar 31st, 2016 (Noon UTC)
 
     /**
      * certdata.txt contents
@@ -68,7 +68,7 @@ class MozillaCertData extends AbstractCaRootData
                 'verify_peer'       => true,
                 'allow_self_signed' => false,
                 'cafile'            => $this->getRootCaBundlePath(),
-                'CN_match'          => 'mxr.mozilla.org',
+                (PHP_VERSION_ID < 50600) ? 'CN_match' : 'peer_name' => 'mxr.mozilla.org',
             )));
         }
 
@@ -168,6 +168,6 @@ class MozillaCertData extends AbstractCaRootData
 
     protected function getRootCaBundlePath()
     {
-        return Sslurp::getSystemCaRootBundlePath() ?: __DIR__ . '/../../data/Equifax_Secure_Ca.pem';
+        return Sslurp::getSystemCaRootBundlePath() ?: __DIR__ . '/../../data/DigiCert_High_Assurance_EV_Root_CA.pem';
     }
 }
