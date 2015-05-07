@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-output=$(php php-cs-fixer.phar fix -v --no-interaction --dry-run --level=all .)
+output=$(php php-cs-fixer.phar fix -v --no-interaction --dry-run --level=all src/)
 echo ""
 if [[ $output ]]; then
     while read -r line
