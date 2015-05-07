@@ -44,7 +44,7 @@ class MozillaCertDataTest extends TestCase
         $this->assertSame(true, $opts['ssl']['verify_peer']);
         $this->assertSame(false, $opts['ssl']['allow_self_signed']);
         $this->assertRegExp('/^.+\.(pem|crt)$/', $opts['ssl']['cafile']);
-        $this->assertSame('mxr.mozilla.org', $opts['ssl']['CN_match']);
+        $this->assertSame('mxr.mozilla.org', $opts['ssl'][(PHP_VERSION_ID < 50600) ? 'CN_match' : 'peer_name']);
     }
 
     public function testCanParseVersionAndDateDataProperly()

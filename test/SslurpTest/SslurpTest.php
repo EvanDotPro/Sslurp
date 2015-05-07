@@ -14,9 +14,9 @@ class SslurpTest extends TestCase
         $this->assertRegExp('/^.+\.(pem|crt)$/', $caBundlePath);
 
         // Check that we can override it with some other valid bundle
-        putenv('SSL_CERT_FILE=' . __DIR__ . '/../../data/Equifax_Secure_CA.pem');
+        putenv('SSL_CERT_FILE=' . __DIR__ . '/../../data/DigiCert_High_Assurance_EV_Root_CA.pem');
         $caBundlePath = Sslurp::getSystemCaRootBundlePath();
-        $this->assertSame(__DIR__ . '/../../data/Equifax_Secure_CA.pem', $caBundlePath);
+        $this->assertSame(__DIR__ . '/../../data/DigiCert_High_Assurance_EV_Root_CA.pem', $caBundlePath);
         putenv('SSL_CERT_FILE');
     }
 }
