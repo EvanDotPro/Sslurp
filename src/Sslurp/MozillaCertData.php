@@ -136,7 +136,7 @@ class MozillaCertData extends AbstractCaRootData
             $position    = strpos($string, "\r\n", $currentPos);
             $length      = hexdec(substr($string, $currentPos, $position - $currentPos));
             $result     .= substr($string, $position + 2, $length);
-            $currentPos  = $position + 2;
+            $currentPos  = $position + 2 + $length;
         }
 
         return $result;
